@@ -55,6 +55,8 @@ int main()
 
 	int iResult = bind(tcpsocket, (struct sockaddr*)&socketAddress, sizeof(socketAddress));
 
+	closesocket(tcpsocket);
+	WSACleanup();
 
 
 
