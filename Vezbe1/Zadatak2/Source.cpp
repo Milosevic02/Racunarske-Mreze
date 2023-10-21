@@ -58,17 +58,6 @@ int main()
 	closesocket(tcpsocket);
 	WSACleanup();
 
-
-
-
-
-
-
-
-
-
-
-
 	return 0;
 }
 
