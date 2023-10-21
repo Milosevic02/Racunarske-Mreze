@@ -53,6 +53,9 @@ int main()
 	SOCKET tcpsocket;
 	tcpsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
+	int iResult = bind(tcpsocket, (struct sockaddr*)&socketAddress, sizeof(socketAddress));
+
+
 
 
 
