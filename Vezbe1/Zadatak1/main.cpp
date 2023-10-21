@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #include <stdio.h> #include <stdlib.h>
+#include <ctype.h>
 int main()
 {
 	char str[1000], ch;
@@ -17,7 +18,7 @@ int main()
 		}
 		for (i=0; str[i] != '\0'; ++i)
 		{
-			if (ch == str[i])
+			if (tolower(ch) == tolower(str[i]))
 				++frequency;
 		}
 		printf("Frequency of %c = %d", ch, frequency);
