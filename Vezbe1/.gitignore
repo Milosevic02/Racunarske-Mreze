@@ -1,0 +1,7 @@
+# Ignore all files except .cpp files
+*
+!*.cpp
+
+# Optionally, ignore specific files or directories you don't want to track
+# filename.extension
+# directoryname/
