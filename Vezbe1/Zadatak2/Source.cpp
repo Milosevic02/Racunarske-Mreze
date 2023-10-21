@@ -41,6 +41,7 @@ int main()
 	*/
 
 	SOCKADDR_IN socketAddress;
+
 	short nPortId = 55555;
 
 	socketAddress.sin_family = AF_INET; //IPv4 adresna familija
@@ -48,6 +49,12 @@ int main()
 	socketAddress.sin_addr.s_addr = inet_addr("127.0.0.1");//Loopback IP adresa
 
 	socketAddress.sin_port = htons(nPortId);
+
+	SOCKET tcpsocket;
+	tcpsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+
+
 
 
 
