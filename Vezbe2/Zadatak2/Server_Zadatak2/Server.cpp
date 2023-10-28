@@ -24,6 +24,7 @@ int main()
 
     // Buffer we will use to send and receive clients' messages
     char dataBuffer[BUFFER_SIZE];
+    char lastMessage[BUFFER_SIZE] = "";
 
     // WSADATA data structure that is to receive details of the Windows Sockets implementation
     WSADATA wsaData;
@@ -99,33 +100,43 @@ int main()
         // Set end of string
         dataBuffer[iResult] = '\0';
 
-        char ipAddress[16]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+        if (!strcmp(dataBuffer, lastMessage)) {
+            break;
+        }
+        else {
+            strcpy_s(lastMessage, dataBuffer);
 
-        // Copy client ip to local char[]
-        strcpy_s(ipAddress, sizeof(ipAddress), inet_ntoa(clientAddress.sin_addr));
+            char ipAddress[16]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
 
-        // Convert port number from network byte order to host byte order
-        unsigned short clientPort = ntohs(clientAddress.sin_port);
+            // Copy client ip to local char[]
+            strcpy_s(ipAddress, sizeof(ipAddress), inet_ntoa(clientAddress.sin_addr));
 
-        printf("Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
+            // Convert port number from network byte order to host byte order
+            unsigned short clientPort = ntohs(clientAddress.sin_port);
 
-        iResult = sendto(serverSocket,		// Own socket
-            dataBuffer,						// Text of message
-            strlen(dataBuffer),				// Message size
-            0,								// No flags
-            (SOCKADDR*)&clientAddress,		// Address structure of server (type, IP address and port)
-            sizeof(clientAddress));			// Size of sockadr_in structure
 
-        // Check if message is succesfully sent. If not, close client application
-        if (iResult == SOCKET_ERROR)
-        {
-            printf("sendto failed with error: %d\n", WSAGetLastError());
-            closesocket(serverSocket);
-            WSACleanup();
-            return 1;
+            printf("Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
+
+            iResult = sendto(serverSocket,		// Own socket
+                dataBuffer,						// Text of message
+                strlen(dataBuffer),				// Message size
+                0,								// No flags
+                (SOCKADDR*)&clientAddress,		// Address structure of server (type, IP address and port)
+                sizeof(clientAddress));			// Size of sockadr_in structure
+
+            // Check if message is succesfully sent. If not, close client application
+            if (iResult == SOCKET_ERROR)
+            {
+                printf("sendto failed with error: %d\n", WSAGetLastError());
+                closesocket(serverSocket);
+                WSACleanup();
+                return 1;
+            }
+
+            // Possible server-shutdown logic could be put here
         }
 
-        // Possible server-shutdown logic could be put here
+
     }
 
     // Close server application
