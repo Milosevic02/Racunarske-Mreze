@@ -109,6 +109,22 @@ int main()
 
         printf("Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
 
+        iResult = sendto(serverSocket,		// Own socket
+            dataBuffer,						// Text of message
+            strlen(dataBuffer),				// Message size
+            0,								// No flags
+            (SOCKADDR*)&clientAddress,		// Address structure of server (type, IP address and port)
+            sizeof(clientAddress));			// Size of sockadr_in structure
+
+        // Check if message is succesfully sent. If not, close client application
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("sendto failed with error: %d\n", WSAGetLastError());
+            closesocket(serverSocket);
+            WSACleanup();
+            return 1;
+        }
+
         // Possible server-shutdown logic could be put here
     }
 

@@ -91,6 +91,16 @@ int main()
                 WSACleanup();
                 return 1;
             }
+
+            // Receive client message
+            iResult = recvfrom(clientSocket,	// Own socket
+                dataBuffer,					    // Buffer that will be used for receiving message
+                BUFFER_SIZE,					// Maximal size of buffer
+                0,							    // No flags
+                (SOCKADDR*)&serverAddress,	    // Client information from received message (ip address and port)
+                &sockAddrLen);				    // Size of sockadd_in structure
+
+            printf("Poruka od servera: %s \n", dataBuffer);
         }
 
 
