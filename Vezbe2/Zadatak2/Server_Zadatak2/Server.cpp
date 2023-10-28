@@ -104,6 +104,23 @@ int main()
             break;
         }
         else {
+            int small_letters = 0;
+            int big_letters = 0;
+            int special_char = 0;
+            int length = strlen(dataBuffer);
+
+            for (int i = 0;i < length;i++) {
+                if (islower(dataBuffer[i])) {
+                    small_letters++;
+                }
+                else if (isupper(dataBuffer[i])) {
+                    big_letters++;
+                }
+                else {
+                    special_char++;
+                }
+            }
+
             strcpy_s(lastMessage, dataBuffer);
 
             char ipAddress[16]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
@@ -116,6 +133,7 @@ int main()
 
 
             printf("Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
+            printf("Message have: Small letters = %d  Big_letters = %d   Else = %d   Length = %d\n", small_letters, big_letters, special_char, length);
 
             iResult = sendto(serverSocket,		// Own socket
                 dataBuffer,						// Text of message
