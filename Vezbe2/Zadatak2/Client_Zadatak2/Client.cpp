@@ -15,7 +15,7 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 #define SERVER_IP_ADDRESS "127.0.0.1"		// IPv4 address of server
-#define SERVER_PORT 15000					// Port number of server that will be used for communication with clients
+#define SERVER_PORT 15001					// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512						// Size of buffer that will be used for sending and receiving messages to client
 
 
