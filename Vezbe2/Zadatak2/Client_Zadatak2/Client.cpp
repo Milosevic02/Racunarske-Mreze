@@ -71,22 +71,29 @@ int main()
         // Read string from user into outgoing buffer
         gets_s(dataBuffer, BUFFER_SIZE);
 
-        // Send message to server
-        iResult = sendto(clientSocket,		// Own socket
-            dataBuffer,						// Text of message
-            strlen(dataBuffer),				// Message size
-            0,								// No flags
-            (SOCKADDR*)&serverAddress,		// Address structure of server (type, IP address and port)
-            sizeof(serverAddress));			// Size of sockadr_in structure
-
-        // Check if message is succesfully sent. If not, close client application
-        if (iResult == SOCKET_ERROR)
-        {
-            printf("sendto failed with error: %d\n", WSAGetLastError());
-            closesocket(clientSocket);
-            WSACleanup();
-            return 1;
+        if (!strcmp(dataBuffer, "stop client")) {
+            break;
         }
+        else {
+            // Send message to server
+            iResult = sendto(clientSocket,		// Own socket
+                dataBuffer,						// Text of message
+                strlen(dataBuffer),				// Message size
+                0,								// No flags
+                (SOCKADDR*)&serverAddress,		// Address structure of server (type, IP address and port)
+                sizeof(serverAddress));			// Size of sockadr_in structure
+
+            // Check if message is succesfully sent. If not, close client application
+            if (iResult == SOCKET_ERROR)
+            {
+                printf("sendto failed with error: %d\n", WSAGetLastError());
+                closesocket(clientSocket);
+                WSACleanup();
+                return 1;
+            }
+        }
+
+
     }
 
 
