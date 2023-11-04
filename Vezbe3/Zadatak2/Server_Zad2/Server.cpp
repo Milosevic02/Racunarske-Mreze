@@ -31,6 +31,8 @@ int main()
     int iResult;
     int iResult2;
 
+    bool wrong1 = false;
+    bool wrong2 = false;
 
     // Buffer used for storing incoming data
     char dataBuffer[BUFFER_SIZE];
@@ -169,9 +171,16 @@ int main()
             {
                 dataBuffer[iResult] = '\0';
 
-                // Log message text
-                printf("Client sent: %s.\n", dataBuffer);
-
+                if (dataBuffer[0] == letter) {
+                    // Log message text
+                    printf("Client sent: %s.\n", dataBuffer);
+                }
+                else {
+                    wrong1 = true;
+                }
+                if (!strcmp(dataBuffer, "Kraj")) {
+                    wrong1 = true;
+                }
             }
             else if (iResult == 0)	// Check if shutdown command is received
             {
@@ -193,8 +202,16 @@ int main()
             {
                 dataBuffer2[iResult2] = '\0';
 
-                // Log message text
-                printf("Client2 sent: %s.\n", dataBuffer2);
+                if (dataBuffer2[0] == letter) {
+                    // Log message text
+                    printf("Client2 sent: %s.\n", dataBuffer2);
+                }
+                else {
+                    wrong2 = true;
+                }
+                if (!strcmp(dataBuffer, "Kraj")) {
+                    wrong2 = true;
+                }
 
             }
             else if (iResult2 == 0)	// Check if shutdown command is received
@@ -208,6 +225,20 @@ int main()
 
                 printf("recv failed with error: %d\n", WSAGetLastError());
                 closesocket(acceptedSocket2);
+            }
+
+            if (wrong1 && wrong2) {
+                printf("Both client make a mistake and game continue");
+                wrong1 = false;
+                wrong2 = false;
+            }
+            else if (wrong1) {
+                printf("Client2 WON!");
+                break;
+            }
+            else if (wrong2) {
+                printf("Client1 WON");
+                break;
             }
 
         } while (iResult > 0 || iResult2 > 0);
