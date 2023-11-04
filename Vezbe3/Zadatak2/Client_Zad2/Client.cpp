@@ -66,6 +66,29 @@ int main()
         return 1;
     }
 
+    iResult = recv(connectSocket, dataBuffer, BUFFER_SIZE, 0);
+
+    if (iResult > 0)	// Check if message is successfully received
+    {
+        dataBuffer[iResult] = '\0';
+
+        // Log message text
+        printf("%s.\n", dataBuffer);
+
+    }
+    else if (iResult == 0)	// Check if shutdown command is received
+    {
+        // Connection was closed successfully
+        printf("Connection with client closed.\n");
+        closesocket(connectSocket);
+    }
+    else	// There was an error during recv
+    {
+
+        printf("recv failed with error: %d\n", WSAGetLastError());
+        closesocket(connectSocket);
+    }
+
     // Read string from user into outgoing buffer
     printf("Enter message to send: ");
     gets_s(dataBuffer, BUFFER_SIZE);

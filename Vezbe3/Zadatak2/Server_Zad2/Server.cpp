@@ -128,8 +128,40 @@ int main()
 
         printf("\nSecond client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 
+        printf("Choose letter:");
+        char letter;
+        scanf("%c", &letter);
+
+        sprintf(dataBuffer, "Game start with letter : %c.", letter);
+
+        iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+
+        // Check result of send function
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(acceptedSocket);
+            WSACleanup();
+            return 1;
+        }
+
+        printf("Message successfully sent. Total bytes: %ld\n", iResult);
+
+        iResult2 = send(acceptedSocket2, dataBuffer, (int)strlen(dataBuffer), 0);
+        // Check result of send function
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(acceptedSocket);
+            WSACleanup();
+            return 1;
+        }
+
+        printf("Message successfully sent. Total bytes: %ld\n", iResult);
+
         do
         {
+
             // Receive data until the client shuts down the connection
             iResult = recv(acceptedSocket, dataBuffer, BUFFER_SIZE, 0);
 
