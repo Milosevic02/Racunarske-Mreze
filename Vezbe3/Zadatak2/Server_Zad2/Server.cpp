@@ -24,12 +24,18 @@ int main()
 
     // Socket used for communication with client
     SOCKET acceptedSocket = INVALID_SOCKET;
+    SOCKET acceptedSocket2 = INVALID_SOCKET;
+
 
     // Variable used to store function return value
     int iResult;
+    int iResult2;
+
 
     // Buffer used for storing incoming data
     char dataBuffer[BUFFER_SIZE];
+    char dataBuffer2[BUFFER_SIZE];
+
 
     // WSADATA data structure that is to receive details of the Windows Sockets implementation
     WSADATA wsaData;
@@ -92,7 +98,9 @@ int main()
         // Struct for information about connected client
         sockaddr_in clientAddr;
 
+
         int clientAddrSize = sizeof(struct sockaddr_in);
+
 
         // Accept new connections from clients 
         acceptedSocket = accept(listenSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
@@ -106,7 +114,19 @@ int main()
             return 1;
         }
 
-        printf("\nNew client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+        printf("\First client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+
+        acceptedSocket2 = accept(listenSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
+
+        if (acceptedSocket2 == INVALID_SOCKET)
+        {
+            printf("accept failed with error: %d\n", WSAGetLastError());
+            closesocket(listenSocket);
+            WSACleanup();
+            return 1;
+        }
+
+        printf("\nSecond client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 
         do
         {
