@@ -130,9 +130,9 @@ int main()
 
         printf("Choose letter:");
         char letter;
-        scanf("%c", &letter);
+        scanf_s("%c", &letter);
 
-        sprintf(dataBuffer, "Game start with letter : %c.", letter);
+        sprintf_s(dataBuffer, "Game start with letter : %c.", letter);
 
         iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
 
@@ -186,7 +186,31 @@ int main()
                 closesocket(acceptedSocket);
             }
 
-        } while (iResult > 0);
+            // Receive data until the client shuts down the connection
+            iResult2 = recv(acceptedSocket2, dataBuffer2, BUFFER_SIZE, 0);
+
+            if (iResult2 > 0)	// Check if message is successfully received
+            {
+                dataBuffer2[iResult2] = '\0';
+
+                // Log message text
+                printf("Client2 sent: %s.\n", dataBuffer2);
+
+            }
+            else if (iResult2 == 0)	// Check if shutdown command is received
+            {
+                // Connection was closed successfully
+                printf("Connection with client closed.\n");
+                closesocket(acceptedSocket2);
+            }
+            else	// There was an error during recv
+            {
+
+                printf("recv failed with error: %d\n", WSAGetLastError());
+                closesocket(acceptedSocket2);
+            }
+
+        } while (iResult > 0 || iResult2 > 0);
 
         // Here is where server shutdown loguc could be placed
 
