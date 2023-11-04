@@ -212,7 +212,7 @@ int main()
                     // Log message text
                     printf("Correct word\n");
                     correctWords2++;
-                    length2 += (int)strlen(dataBuffer);
+                    length2 += (int)strlen(dataBuffer2);
                 }
                 else {
                     wrong2 = true;
