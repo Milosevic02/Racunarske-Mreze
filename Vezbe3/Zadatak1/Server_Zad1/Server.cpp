@@ -119,6 +119,7 @@ int main()
 
                 // Log message text
                 printf("Client sent: %s.\n", dataBuffer);
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
 
             }
             else if (iResult == 0)	// Check if shutdown command is received
