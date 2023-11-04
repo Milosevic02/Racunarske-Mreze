@@ -34,6 +34,15 @@ int main()
     bool wrong1 = false;
     bool wrong2 = false;
 
+    bool end1 = false;
+    bool end2 = false;
+
+    int correctWords1 = 0;
+    int correctWords2 = 0;
+
+    int length1 = 0;
+    int length2 = 0;
+
     // Buffer used for storing incoming data
     char dataBuffer[BUFFER_SIZE];
     char dataBuffer2[BUFFER_SIZE];
@@ -163,30 +172,26 @@ int main()
 
         do
         {
-
             // Receive data until the client shuts down the connection
             iResult = recv(acceptedSocket, dataBuffer, BUFFER_SIZE, 0);
 
             if (iResult > 0)	// Check if message is successfully received
             {
                 dataBuffer[iResult] = '\0';
+                printf("Client sent: %s.\n", dataBuffer);
 
-                if (dataBuffer[0] == letter) {
+                if (toupper(dataBuffer[0]) == toupper(letter)) {
                     // Log message text
-                    printf("Client sent: %s.\n", dataBuffer);
+                    printf("Correct word\n");
+                    correctWords1++;
+                    length1 += (int)strlen(dataBuffer);
                 }
                 else {
                     wrong1 = true;
                 }
                 if (!strcmp(dataBuffer, "Kraj")) {
-                    wrong1 = true;
+                    end1 = true;
                 }
-            }
-            else if (iResult == 0)	// Check if shutdown command is received
-            {
-                // Connection was closed successfully
-                printf("Connection with client closed.\n");
-                closesocket(acceptedSocket);
             }
             else	// There was an error during recv
             {
@@ -201,24 +206,21 @@ int main()
             if (iResult2 > 0)	// Check if message is successfully received
             {
                 dataBuffer2[iResult2] = '\0';
+                printf("Client2 sent: %s.\n", dataBuffer2);
 
                 if (dataBuffer2[0] == letter) {
                     // Log message text
-                    printf("Client2 sent: %s.\n", dataBuffer2);
+                    printf("Correct word\n");
+                    correctWords2++;
+                    length2 += (int)strlen(dataBuffer);
                 }
                 else {
                     wrong2 = true;
                 }
                 if (!strcmp(dataBuffer, "Kraj")) {
-                    wrong2 = true;
+                    end2 = true;
                 }
 
-            }
-            else if (iResult2 == 0)	// Check if shutdown command is received
-            {
-                // Connection was closed successfully
-                printf("Connection with client closed.\n");
-                closesocket(acceptedSocket2);
             }
             else	// There was an error during recv
             {
@@ -227,20 +229,68 @@ int main()
                 closesocket(acceptedSocket2);
             }
 
-            if (wrong1 && wrong2) {
-                printf("Both client make a mistake and game continue");
+            if (end1 && end2) {
+                if (length1 > length2) {
+                    sprintf_s(dataBuffer, "YOU ARE WINNER\nYou have correct words = %d and length = %d", correctWords1, length1);
+                    sprintf_s(dataBuffer2, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords2, length2);
+                }
+                else if (length2 > length1) {
+                    sprintf_s(dataBuffer2, "YOU ARE WINNER\nYou have correct words = %d and length = %d", correctWords2, length2);
+                    sprintf_s(dataBuffer, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords1, length1);
+                }
+                else {
+                    sprintf_s(dataBuffer, "DRAW\nYou have correct words = %d and length = %d", correctWords1, length1);
+                    sprintf_s(dataBuffer2, "DRAW\nYou have correct words = %d and length = %d", correctWords2, length2);
+
+                }
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer2, (int)strlen(dataBuffer), 0);
+                break;
+            }
+            else if (wrong1 && wrong2) {
+                sprintf_s(dataBuffer,"Both client make a mistake and game continue");
                 wrong1 = false;
                 wrong2 = false;
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer, (int)strlen(dataBuffer), 0);
+            }
+            else if (end1) {
+                sprintf_s(dataBuffer2, "YOU ARE WINNER\nYou have correct words = %d and length = %d", correctWords2, length2);
+                sprintf_s(dataBuffer, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords1, length1);
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer2, (int)strlen(dataBuffer), 0);
+                break;
+
+            }
+            else if (end2) {
+                sprintf_s(dataBuffer, "YOU ARE WINNER\nYou have correct words = %d and length = %d",correctWords1,length1);
+                sprintf_s(dataBuffer2, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords2, length2);
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer2, (int)strlen(dataBuffer), 0);
+                break;
+
             }
             else if (wrong1) {
-                printf("Client2 WON!");
+                sprintf_s(dataBuffer2, "YOU ARE WINNER\nYou have correct words = %d and length = %d", correctWords2, length2);
+                sprintf_s(dataBuffer, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords1, length1);
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer2, (int)strlen(dataBuffer), 0);
                 break;
+
             }
             else if (wrong2) {
-                printf("Client1 WON");
+                sprintf_s(dataBuffer, "YOU ARE WINNER\nYou have correct words = %d and length = %d", correctWords1, length1);
+                sprintf_s(dataBuffer2, "YOU ARE LOSE\nYou have correct words = %d and length = %d", correctWords2, length2);
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer2, (int)strlen(dataBuffer), 0);
                 break;
-            }
 
+            }
+            else {
+                sprintf_s(dataBuffer, "Both Client have correct word lets continue");
+                iResult = send(acceptedSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+                iResult = send(acceptedSocket2, dataBuffer, (int)strlen(dataBuffer), 0);
+            }
         } while (iResult > 0 || iResult2 > 0);
 
         // Here is where server shutdown loguc could be placed

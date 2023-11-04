@@ -76,12 +76,6 @@ int main()
         printf("%s.\n", dataBuffer);
 
     }
-    else if (iResult == 0)	// Check if shutdown command is received
-    {
-        // Connection was closed successfully
-        printf("Connection with client closed.\n");
-        closesocket(connectSocket);
-    }
     else	// There was an error during recv
     {
 
@@ -89,23 +83,45 @@ int main()
         closesocket(connectSocket);
     }
 
-    // Read string from user into outgoing buffer
-    printf("Enter message to send: ");
-    gets_s(dataBuffer, BUFFER_SIZE);
+    bool end = true;
 
-    // Send message to server using connected socket
-    iResult = send(connectSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+    do{
 
-    // Check result of send function
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("send failed with error: %d\n", WSAGetLastError());
-        closesocket(connectSocket);
-        WSACleanup();
-        return 1;
-    }
+        // Read string from user into outgoing buffer
+        printf("Enter word to send: ");
+        gets_s(dataBuffer, BUFFER_SIZE);
 
-    printf("Message successfully sent. Total bytes: %ld\n", iResult);
+        // Send message to server using connected socket
+        iResult = send(connectSocket, dataBuffer, (int)strlen(dataBuffer), 0);
+
+        // Check result of send function
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(connectSocket);
+            WSACleanup();
+            return 1;
+
+        }
+
+        iResult = recv(connectSocket, dataBuffer, BUFFER_SIZE, 0);
+
+        if (iResult > 0)	// Check if message is successfully received
+        {
+            dataBuffer[iResult] = '\0';
+            printf("%s\n", dataBuffer);
+
+            if (strstr(dataBuffer, "WINNER") || strstr(dataBuffer, "LOSE"))
+                end = false;
+        }
+        else	// There was an error during recv
+        {
+
+            printf("recv failed with error: %d\n", WSAGetLastError());
+            closesocket(connectSocket);
+        }
+    } while (end);
+
 
     // Shutdown the connection since we're done
     iResult = shutdown(connectSocket, SD_BOTH);
@@ -119,9 +135,6 @@ int main()
         return 1;
     }
 
-    // For demonstration purpose
-    printf("\nPress any key to exit: ");
-    _getch();
 
 
     // Close connected socket
