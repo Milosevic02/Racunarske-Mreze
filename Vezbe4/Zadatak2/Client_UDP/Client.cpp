@@ -19,11 +19,11 @@
 
 int main()
 {
-    int port;
-        printf("Choose 17010 or 17011 for port:");
-        scanf_s("%d", &port);
-        fflush(stdin);
+    char port[15];
+    printf("Choose 17010 or 17011 for port:");
+    gets_s(port, sizeof(port));
 
+    int portNum = atoi(port);
     // Server address structure
     sockaddr_in serverAddress;
 
@@ -52,7 +52,7 @@ int main()
     // Initialize address structure of server
     serverAddress.sin_family = AF_INET;								// IPv4 address famly
     serverAddress.sin_addr.s_addr = inet_addr(SERVER_IP_ADDRESS);	// Set server IP address using string
-    serverAddress.sin_port = htons((unsigned short)port);					// Set server port
+    serverAddress.sin_port = htons((unsigned short)portNum);					// Set server port
 
     // Create a socket
     SOCKET clientSocket = socket(AF_INET,      // IPv4 address famly
