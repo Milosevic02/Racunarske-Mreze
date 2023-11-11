@@ -8,6 +8,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "conio.h"
+#include "string.h"
+#include <sstream>
+#include <iostream>
+
+using namespace std;
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -148,8 +153,23 @@ int main()
             {
                 dataBuffer[iResult] = '\0';
 
+                printf("AcceptSocket1 recive message.Client1 sent: %s.\n", dataBuffer);
+
+
+                int suma = 0;
+                istringstream iss(dataBuffer);
+                string token;
+                char delim = ',';
+
+                while (getline(iss, token, delim)) {
+                    int num = stoi(token);
+                    suma += num;
+                }
+
+                char message[50];
+                sprintf_s(message, "Suma je : %d", suma);
+                iResult = send(acceptedSocket, message, (int)strlen(message), 0);
                 // Log message text
-                printf("Client sent: %s.\n", dataBuffer);
             }
             else if (iResult == 0)	// Check if shutdown command is received
             {
@@ -161,8 +181,7 @@ int main()
             else	// u neblokir. rezimu funkcija se cesto neuspesno iyvrsi jer nije spreman, pa bi zelela da blokira program
             {
                 if (WSAGetLastError() == WSAEWOULDBLOCK) {
-                    // U pitanju je blokirajuca operacija 
-                    // tj. poruka jos nije stigla
+                    Sleep(1500);
                 }
                 else {
                     // Desila se neka druga greska prilikom poziva operacije
@@ -180,8 +199,24 @@ int main()
             {
                 dataBuffer2[iResult2] = '\0';
 
+                printf("AcceptSocket2 recive message.Client2 sent: %s.\n", dataBuffer2);
+
+
+                int suma = 0;
+                istringstream iss(dataBuffer2);
+                string token;
+                char delim = ',';
+
+                while (getline(iss, token, delim)) {
+                    int num = stoi(token);
+                    suma += num;
+                    cout << num << endl;
+                }
+                char message[50];
+                sprintf_s(message, "Suma je : %d", suma);
+                iResult2 = send(acceptedSocket2, message, (int)strlen(message), 0);
+
                 // Log message text
-                printf("Client2 sent: %s.\n", dataBuffer2);
             }
             else if (iResult2 == 0)	// Check if shutdown command is received
             {
