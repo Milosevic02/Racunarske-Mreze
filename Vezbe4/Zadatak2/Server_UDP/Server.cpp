@@ -114,6 +114,8 @@ int main()
 		int i;
 
 		printf("\nUDP server waiting for new messages\n");
+		int counter1 = 0;
+		int counter2 = 0;
 
 		for (i = 0; i < NOATTEMPTS; i++)
 		{
