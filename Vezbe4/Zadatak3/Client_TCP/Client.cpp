@@ -67,7 +67,7 @@ int main()
     }
 
     do {
-        printf("Unesite poruku za slanje:\n");
+        printf("Unesite niz od 3 vrednosti za slanje:\n");
         gets_s(dataBuffer, BUFFER_SIZE);
 
         if (!strcmp(dataBuffer, "End")) {
@@ -84,6 +84,15 @@ int main()
             closesocket(connectSocket);
             WSACleanup();
             return 1;
+        }
+
+        iResult = recv(connectSocket, dataBuffer, BUFFER_SIZE, 0);
+
+        if (iResult > 0)	// Check if message is successfully received
+        {
+            dataBuffer[iResult] = '\0';
+
+            printf("Suma je %s.\n", dataBuffer);
         }
     } while (true);
 
