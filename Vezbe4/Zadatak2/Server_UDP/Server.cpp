@@ -108,14 +108,16 @@ int main()
 
 	int NOATTEMPTS = 30; // if server has received no message in period of 30 seconds, then server is shutting down.
 
+	int points1 = 0;
+	int points2 = 0;
+
 	// Main server loop
 	while (true)
 	{
 		int i;
 
 		printf("\nUDP server waiting for new messages\n");
-		int counter1 = 31;
-		int counter2 = 31;
+
 
 		for (i = 0; i < NOATTEMPTS; i++)
 		{
@@ -130,7 +132,6 @@ int main()
 			// Check if message is succesfully received, print message and continue waiting for new message
 			if (iResult != SOCKET_ERROR)
 			{
-
 				// Set end of string
 				dataBuffer[iResult] = '\0';
 
@@ -141,8 +142,7 @@ int main()
 
 				// Convert port number from network byte order to host byte order
 				unsigned short clientPort = ntohs(clientAddress.sin_port);
-
-				printf("Client (ip: %s, port: %d) sent: %s.\n", ipAddress, clientPort, dataBuffer);
+				printf("Client (ip: %s, port: %d,points:%d) sent: %s.\n", ipAddress, clientPort, dataBuffer,++points1);
 				break;
 			}
 			else
@@ -184,8 +184,7 @@ int main()
 
 				// Convert port number from network byte order to host byte order
 				unsigned short clientPort = ntohs(clientAddress.sin_port);
-
-				printf("Client (ip: %s, port: %d) sent: %s.\n", ipAddress, clientPort, dataBuffer2);
+				printf("Client (ip: %s, port: %d,points:%d) sent: %s.\n", ipAddress, clientPort, dataBuffer2,++points2);
 				break;
 			}
 			else
