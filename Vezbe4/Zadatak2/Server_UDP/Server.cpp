@@ -114,8 +114,8 @@ int main()
 		int i;
 
 		printf("\nUDP server waiting for new messages\n");
-		int counter1 = 0;
-		int counter2 = 0;
+		int counter1 = 31;
+		int counter2 = 31;
 
 		for (i = 0; i < NOATTEMPTS; i++)
 		{
@@ -130,6 +130,7 @@ int main()
 			// Check if message is succesfully received, print message and continue waiting for new message
 			if (iResult != SOCKET_ERROR)
 			{
+
 				// Set end of string
 				dataBuffer[iResult] = '\0';
 
