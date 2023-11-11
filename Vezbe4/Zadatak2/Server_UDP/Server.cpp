@@ -197,7 +197,7 @@ int main()
 				else
 				{
 					printf("recvfrom failed with error: %d\n", WSAGetLastError());
-					iResult = closesocket(serverSocket);
+					iResult2 = closesocket(serverSocket);
 					WSACleanup();
 					return 1;
 				}
@@ -214,6 +214,13 @@ int main()
 	// Close server application
 	iResult = closesocket(serverSocket);
 	if (iResult == SOCKET_ERROR)
+	{
+		printf("closesocket failed with error: %ld\n", WSAGetLastError());
+		WSACleanup();
+		return 1;
+	}
+	iResult2 = closesocket(serverSocket2);
+	if (iResult2 == SOCKET_ERROR)
 	{
 		printf("closesocket failed with error: %ld\n", WSAGetLastError());
 		WSACleanup();
