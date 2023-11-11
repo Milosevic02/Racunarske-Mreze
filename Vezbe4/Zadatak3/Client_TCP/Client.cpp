@@ -70,6 +70,10 @@ int main()
         printf("Unesite poruku za slanje:\n");
         gets_s(dataBuffer, BUFFER_SIZE);
 
+        if (!strcmp(dataBuffer, "End")) {
+            break;
+        }
+
         // saljemo nizBrojeva prosledjujuci njegovu adresu i duzinu poruke (niza) u bajtima
         iResult = send(connectSocket, dataBuffer, (int)strlen(dataBuffer), 0);
 
