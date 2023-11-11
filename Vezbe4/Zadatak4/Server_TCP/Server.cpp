@@ -157,17 +157,21 @@ int main()
 
 
                 int suma = 0;
+                int max = 0;
                 istringstream iss(dataBuffer);
                 string token;
                 char delim = ',';
 
                 while (getline(iss, token, delim)) {
                     int num = stoi(token);
+                    if (num > max) {
+                        max = num;
+                    }
                     suma += num;
                 }
 
                 char message[50];
-                sprintf_s(message, "Suma je : %d", suma);
+                sprintf_s(message, "Suma je : %d    Maks element niza je: %d", suma,max);
                 iResult = send(acceptedSocket, message, (int)strlen(message), 0);
                 // Log message text
             }
@@ -203,17 +207,21 @@ int main()
 
 
                 int suma = 0;
+                int max = 0;
                 istringstream iss(dataBuffer2);
                 string token;
                 char delim = ',';
 
                 while (getline(iss, token, delim)) {
                     int num = stoi(token);
+                    if (num > max) {
+                        max = num;
+                    }
                     suma += num;
-                    cout << num << endl;
                 }
+
                 char message[50];
-                sprintf_s(message, "Suma je : %d", suma);
+                sprintf_s(message, "Suma je : %d    Maks element niza je: %d", suma, max);
                 iResult2 = send(acceptedSocket2, message, (int)strlen(message), 0);
 
                 // Log message text
