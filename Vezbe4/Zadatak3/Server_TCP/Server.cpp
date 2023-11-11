@@ -116,7 +116,7 @@ int main()
             return 1;
         }
 
-        if (acceptedSocket == INVALID_SOCKET)
+        if (acceptedSocket2 == INVALID_SOCKET)
         {
             printf("accept failed with error: %d\n", WSAGetLastError());
             closesocket(listenSocket);
@@ -124,13 +124,19 @@ int main()
             return 1;
         }
 
-        printf("\nNew client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+        printf("\nClient request accepted. Client1 address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+        printf("\nClient request accepted. Client2 address: %s : %d\n", inet_ntoa(clientAddr2.sin_addr), ntohs(clientAddr2.sin_port));
+
 
         //korak 2.a postavljanje uticnica namenjenih klijentima u neblokirajuci rezim
         unsigned long mode = 1; //non-blocking mode
         iResult = ioctlsocket(acceptedSocket, FIONBIO, &mode);
+        iResult2 = ioctlsocket(acceptedSocket2, FIONBIO, &mode);
+
         if (iResult != NO_ERROR)
             printf("ioctlsocket failed with error: %ld\n", iResult);
+        if (iResult2 != NO_ERROR)
+            printf("ioctlsocket failed with error: %ld\n", iResult2);
 
         //polling model prijema poruka
         do
@@ -167,6 +173,38 @@ int main()
 
             }
 
+            // Prijem poruke na 1. uticnici
+            iResult2 = recv(acceptedSocket2, dataBuffer2, BUFFER_SIZE, 0);
+
+            if (iResult2 > 0)	// Check if message is successfully received
+            {
+                dataBuffer2[iResult2] = '\0';
+
+                // Log message text
+                printf("Client2 sent: %s.\n", dataBuffer2);
+            }
+            else if (iResult2 == 0)	// Check if shutdown command is received
+            {
+                // Connection was closed successfully
+                printf("Connection with client closed.\n");
+                closesocket(acceptedSocket);
+                break;
+            }
+            else	// u neblokir. rezimu funkcija se cesto neuspesno iyvrsi jer nije spreman, pa bi zelela da blokira program
+            {
+                if (WSAGetLastError() == WSAEWOULDBLOCK) {
+                    // U pitanju je blokirajuca operacija 
+                    // tj. poruka jos nije stigla
+                }
+                else {
+                    // Desila se neka druga greska prilikom poziva operacije
+                    printf("recv failed with error: %d\n", WSAGetLastError());
+                    closesocket(acceptedSocket2);
+                    break;
+                }
+
+            }
+
         } while (true);
 
     } while (true);
@@ -175,6 +213,8 @@ int main()
     //Close listen and accepted sockets
     closesocket(listenSocket);
     closesocket(acceptedSocket);
+    closesocket(acceptedSocket2);
+
 
     // Deinitialize WSA library
     WSACleanup();
