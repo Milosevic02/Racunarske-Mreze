@@ -14,7 +14,6 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 #define SERVER_IP_ADDRESS "127.0.0.1"		// IPv4 address of server
-#define SERVER_PORT 15001					// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512						// Size of buffer that will be used for sending and receiving messages to client
 
 
@@ -45,10 +44,16 @@ int main()
     // Initialize memory for address structure
     memset((char*)&serverAddress, 0, sizeof(serverAddress));
 
+    char port[15];
+    int port_num;
+    printf("Chosse port 15011 or 15012:");
+    gets_s(port, sizeof(port));
+    port_num = atoi(port);
+
     // Initialize address structure of server
     serverAddress.sin_family = AF_INET;								// IPv4 address famly
     serverAddress.sin_addr.s_addr = inet_addr(SERVER_IP_ADDRESS);	// Set server IP address using string
-    serverAddress.sin_port = htons(SERVER_PORT);					// Set server port
+    serverAddress.sin_port = htons((unsigned short)port_num);					// Set server port
 
     // Create a socket
     SOCKET clientSocket = socket(AF_INET,      // IPv4 address famly
@@ -63,31 +68,36 @@ int main()
         return 1;
     }
 
-    printf("Enter message to send:\n");
+    while (true) {
+        printf("Enter message to send:\n");
 
-    // Read string from user into outgoing buffer
-    gets_s(dataBuffer, BUFFER_SIZE);
+        // Read string from user into outgoing buffer
+        gets_s(dataBuffer, BUFFER_SIZE);
 
-    // Send message to server
-    iResult = sendto(clientSocket,		// Own socket
-        dataBuffer,						// Text of message
-        strlen(dataBuffer),				// Message size
-        0,							    // No flags
-        (SOCKADDR*)&serverAddress,		// Address structure of server (type, IP address and port)
-        sizeof(serverAddress));			// Size of sockadr_in structure
+        if (!strcmp(dataBuffer, "end")) {
+            break;
+        }
 
-    // Check if message is succesfully sent. If not, close client application
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("sendto failed with error: %d\n", WSAGetLastError());
-        closesocket(clientSocket);
-        WSACleanup();
-        return 1;
+        // Send message to server
+        iResult = sendto(clientSocket,		// Own socket
+            dataBuffer,						// Text of message
+            strlen(dataBuffer),				// Message size
+            0,							    // No flags
+            (SOCKADDR*)&serverAddress,		// Address structure of server (type, IP address and port)
+            sizeof(serverAddress));			// Size of sockadr_in structure
+
+        // Check if message is succesfully sent. If not, close client application
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("sendto failed with error: %d\n", WSAGetLastError());
+            closesocket(clientSocket);
+            WSACleanup();
+            return 1;
+        }
     }
 
-    // Only for demonstration purpose
-    printf("Press any key to exit: ");
-    _getch();
+
+
 
     // Close client application
     iResult = closesocket(clientSocket);
