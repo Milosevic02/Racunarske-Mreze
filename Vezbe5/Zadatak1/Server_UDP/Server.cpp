@@ -112,76 +112,29 @@ int main()
 	//set serverSocket in nonblocking mode 
 	unsigned long  mode = 1;
 	iResult = ioctlsocket(serverSocket, FIONBIO, &mode);
+	iResult2 = ioctlsocket(serverSocket2, FIONBIO, &mode);
+
 	if (iResult != 0)
 		printf("ioctlsocket failed with error.");
-
-	int NOATTEMPTS = 30; // if server has received no message in period of 30 seconds, then server is shutting down.
+	if (iResult2 != 0)
+		printf("ioctlsocket failed with error.");
 
 	// Main server loop
 	while (true)
 	{
-		int i;
-
-		printf("\nUDP server waiting for new messages\n");
-
-		for (i = 0; i < NOATTEMPTS; i++)
-		{
-			printf("Attempt #%d\n", i + 1);
-
-			// Receive client message
-			iResult = recvfrom(serverSocket,	// Own socket
-				dataBuffer,						// Buffer that will be used for receiving message
-				BUFFER_SIZE,					// Maximal size of buffer
-				0,								// No flags
-				(SOCKADDR*)&clientAddress,		// Client information from received message (ip address and port)
-				&sockAddrLen);					// Size of sockadd_in structure
-
-			// Check if message is succesfully received, print message and continue waiting for new message
-			if (iResult != SOCKET_ERROR)
-			{
-				// Set end of string
-				dataBuffer[iResult] = '\0';
-
-				char ipAddress[16]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
-
-				// Copy client ip to local char[]
-				strcpy_s(ipAddress, sizeof(ipAddress), inet_ntoa(clientAddress.sin_addr));
-
-				// Convert port number from network byte order to host byte order
-				unsigned short clientPort = ntohs(clientAddress.sin_port);
-
-				printf("Client (ip: %s, port: %d) sent: %s.\n", ipAddress, clientPort, dataBuffer);
-				break;
-			}
-			else
-			{
-				// if recvfrom function returns WSAEWOULDBLOCK error,
-				// nonblocking mode for socket is set and no data has received yet. 
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
-				{
-					Sleep(1000);
-				}
-				// some error occured during message receive, close server
-				else
-				{
-					printf("recvfrom failed with error: %d\n", WSAGetLastError());
-					iResult = closesocket(serverSocket);
-					WSACleanup();
-					return 1;
-				}
-			}
-
-
-		}
-		if (i == NOATTEMPTS)
-		{
-			break;
-		}
 	}
 
 	// Close server application
 	iResult = closesocket(serverSocket);
+	iResult2 = closesocket(serverSocket2);
+
 	if (iResult == SOCKET_ERROR)
+	{
+		printf("closesocket failed with error: %ld\n", WSAGetLastError());
+		WSACleanup();
+		return 1;
+	}
+	if (iResult2 == SOCKET_ERROR)
 	{
 		printf("closesocket failed with error: %ld\n", WSAGetLastError());
 		WSACleanup();
