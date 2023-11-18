@@ -14,16 +14,21 @@
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-#define SERVER_PORT 15001	// Port number of server that will be used for communication with clients
+#define SERVER_PORT 15011	// Port number of server that will be used for communication with clients
+#define SERVER_PORT2 15012	// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
 
 int main()
 {
 	// Server address
 	sockaddr_in serverAddress;
+	sockaddr_in serverAddress2;
+
 
 	// Buffer we will use to send and receive clients' messages
 	char dataBuffer[BUFFER_SIZE];
+	char dataBuffer2[BUFFER_SIZE];
+
 
 	// WSADATA data structure that is to receive details of the Windows Sockets implementation
 	WSADATA wsaData;
@@ -41,8 +46,17 @@ int main()
 	serverAddress.sin_addr.s_addr = INADDR_ANY;		// use all available addresses of server
 	serverAddress.sin_port = htons(SERVER_PORT);
 
+	memset((char*)&serverAddress2, 0, sizeof(serverAddress2));
+	serverAddress2.sin_family = AF_INET; 			// set server address protocol family
+	serverAddress2.sin_addr.s_addr = inet_addr("127.0.0.1");		// use all available addresses of server
+	serverAddress2.sin_port = htons(SERVER_PORT2);
+
 	// Create a socket
 	SOCKET serverSocket = socket(AF_INET,      // IPv4 address famly
+		SOCK_DGRAM,   // datagram socket
+		IPPROTO_UDP); // UDP
+
+	SOCKET serverSocket2 = socket(AF_INET,      // IPv4 address famly
 		SOCK_DGRAM,   // datagram socket
 		IPPROTO_UDP); // UDP
 
@@ -53,15 +67,30 @@ int main()
 		WSACleanup();
 		return 1;
 	}
+	if (serverSocket2 == INVALID_SOCKET)
+	{
+		printf("Creating socket failed with error: %d\n", WSAGetLastError());
+		WSACleanup();
+		return 1;
+	}
 
 	// Bind server address structure (type, port number and local address) to socket
 	int iResult = bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress));
+	int iResult2 = bind(serverSocket2, (SOCKADDR*)&serverAddress2, sizeof(serverAddress2));
+
 
 	// Check if socket is succesfully binded to server datas
 	if (iResult == SOCKET_ERROR)
 	{
 		printf("Socket bind failed with error: %d\n", WSAGetLastError());
 		closesocket(serverSocket);
+		WSACleanup();
+		return 1;
+	}
+	if (iResult2 == SOCKET_ERROR)
+	{
+		printf("Socket bind failed with error: %d\n", WSAGetLastError());
+		closesocket(serverSocket2);
 		WSACleanup();
 		return 1;
 	}
@@ -74,6 +103,8 @@ int main()
 
 	// Set whole buffer to zero
 	memset(dataBuffer, 0, BUFFER_SIZE);
+	memset(dataBuffer2, 0, BUFFER_SIZE);
+
 
 	// size of client address
 	int sockAddrLen = sizeof(clientAddress);
