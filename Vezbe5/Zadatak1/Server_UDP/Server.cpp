@@ -27,8 +27,6 @@ int main()
 
 	// Buffer we will use to send and receive clients' messages
 	char dataBuffer[BUFFER_SIZE];
-	char dataBuffer2[BUFFER_SIZE];
-
 
 	// WSADATA data structure that is to receive details of the Windows Sockets implementation
 	WSADATA wsaData;
@@ -76,7 +74,7 @@ int main()
 
 	// Bind server address structure (type, port number and local address) to socket
 	int iResult = bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress));
-	int iResult2 = bind(serverSocket2, (SOCKADDR*)&serverAddress2, sizeof(serverAddress2));
+
 
 
 	// Check if socket is succesfully binded to server datas
@@ -87,7 +85,8 @@ int main()
 		WSACleanup();
 		return 1;
 	}
-	if (iResult2 == SOCKET_ERROR)
+	iResult = bind(serverSocket2, (SOCKADDR*)&serverAddress2, sizeof(serverAddress2));
+	if (iResult == SOCKET_ERROR)
 	{
 		printf("Socket bind failed with error: %d\n", WSAGetLastError());
 		closesocket(serverSocket2);
@@ -98,35 +97,42 @@ int main()
 	printf("Simple UDP server started and waiting client messages.\n");
 
 	// Declare and initialize client address that will be set from recvfrom
-	sockaddr_in clientAddress;
-	memset(&clientAddress, 0, sizeof(clientAddress));
 
-	// Set whole buffer to zero
-	memset(dataBuffer, 0, BUFFER_SIZE);
-	memset(dataBuffer2, 0, BUFFER_SIZE);
-
-
-	// size of client address
-	int sockAddrLen = sizeof(clientAddress);
 
 	//set serverSocket in nonblocking mode 
 	unsigned long  mode = 1;
-	iResult = ioctlsocket(serverSocket, FIONBIO, &mode);
-	iResult2 = ioctlsocket(serverSocket2, FIONBIO, &mode);
-
-	if (iResult != 0)
-		printf("ioctlsocket failed with error.");
-	if (iResult2 != 0)
-		printf("ioctlsocket failed with error.");
-
+	if (ioctlsocket(serverSocket, FIONBIO, &mode) != 0 || ioctlsocket(serverSocket2, FIONBIO, &mode) != 0)
+	{
+		printf("ioctlsocket failed with error %d\n", WSAGetLastError());
+		closesocket(serverSocket);
+		closesocket(serverSocket2);
+		WSACleanup();
+		return 1;
+	}
 	// Main server loop
 	while (true)
 	{
+		sockaddr_in clientAddress;
+		memset(&clientAddress, 0, sizeof(clientAddress));
+
+		// Set whole buffer to zero
+		memset(dataBuffer, 0, BUFFER_SIZE);
+
+		// size of client address
+		int sockAddrLen = sizeof(clientAddress);
+
+		fd_set readfds;
+		FD_ZERO(&readfds);
+
+		FD_SET(serverSocket, &readfds);
+		FD_SET(serverSocket2, &readfds);
+
+
+
 	}
 
 	// Close server application
 	iResult = closesocket(serverSocket);
-	iResult2 = closesocket(serverSocket2);
 
 	if (iResult == SOCKET_ERROR)
 	{
@@ -134,7 +140,9 @@ int main()
 		WSACleanup();
 		return 1;
 	}
-	if (iResult2 == SOCKET_ERROR)
+	iResult = closesocket(serverSocket2);
+
+	if (iResult == SOCKET_ERROR)
 	{
 		printf("closesocket failed with error: %ld\n", WSAGetLastError());
 		WSACleanup();
