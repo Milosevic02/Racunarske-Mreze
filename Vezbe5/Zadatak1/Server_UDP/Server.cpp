@@ -127,7 +127,56 @@ int main()
 		FD_SET(serverSocket, &readfds);
 		FD_SET(serverSocket2, &readfds);
 
+		fd_set exceptfds;
+		FD_ZERO(&exceptfds);
 
+		FD_SET(serverSocket, &exceptfds);
+		FD_SET(serverSocket2, &exceptfds);
+
+		int sResult = select(0, &readfds, NULL, &exceptfds, NULL);
+
+		if (sResult == SOCKET_ERROR)
+		{
+			printf("select failed with error: %d\n", WSAGetLastError());
+			break;
+		}
+		else if (sResult > 0) {
+			if (FD_ISSET(serverSocket, &readfds)) {
+				iResult = recvfrom(serverSocket, dataBuffer, BUFFER_SIZE, 0, (SOCKADDR*)&clientAddress, &sockAddrLen);
+				if (iResult != SOCKET_ERROR) {
+					dataBuffer[iResult] = '\0';
+
+					printf("Server received message on %d port. Client sent: %s.\n", SERVER_PORT, dataBuffer);
+				}
+				else
+				{
+					printf("recvfrom failed with error: %d\n", WSAGetLastError());
+					continue;
+				}
+			}
+			if (FD_ISSET(serverSocket2, &readfds)) {
+				iResult = recvfrom(serverSocket2, dataBuffer, BUFFER_SIZE, 0, (SOCKADDR*)&clientAddress, &sockAddrLen);
+				if (iResult != SOCKET_ERROR) {
+					dataBuffer[iResult] = '\0';
+
+					printf("Server received message on %d port. Client sent: %s.\n", SERVER_PORT2, dataBuffer);
+				}
+				else
+				{
+					printf("recvfrom failed with error: %d\n", WSAGetLastError());
+					continue;
+				}
+			}
+			if (FD_ISSET(serverSocket, &exceptfds)) {
+				break;
+			}
+			if (FD_ISSET(serverSocket2, &exceptfds)) {
+				break;
+			}
+			else {
+				continue;
+			}
+		}
 
 	}
 
