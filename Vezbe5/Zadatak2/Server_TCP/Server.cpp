@@ -24,8 +24,9 @@ int main()
     // Socket used for listening for new clients 
     SOCKET listenSocket = INVALID_SOCKET;
 
-    // Socket used for communication with client
-    SOCKET acceptedSocket = INVALID_SOCKET;
+    SOCKET clientSockets[MAX_CLIENTS];
+    int count_clients = 0;
+
 
     // Variable used to store function return value
     int iResult;
@@ -50,6 +51,8 @@ int main()
     serverAddress.sin_family = AF_INET;				// IPv4 address family
     serverAddress.sin_addr.s_addr = INADDR_ANY;		// Use all available addresses
     serverAddress.sin_port = htons(SERVER_PORT);	// Use specific port
+
+    memset(clientSockets, 0, MAX_CLIENTS * sizeof(SOCKET));
 
 
     // Create a SOCKET for connecting to server
@@ -77,6 +80,17 @@ int main()
         return 1;
     }
 
+    bool bOptVal = true;
+    int bOptLen = sizeof(bool);
+    iResult = setsockopt(listenSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, (char*)&bOptVal, bOptLen);
+    if (iResult == SOCKET_ERROR) {
+        printf("setsockopt for SO_CONDITIONAL_ACCEPT failed with error: %u\n", WSAGetLastError());
+    }
+
+    unsigned long  mode = 1;
+    if (ioctlsocket(listenSocket, FIONBIO, &mode) != 0)
+        printf("ioctlsocket failed with error.");
+
     // Set listenSocket in listening mode
     iResult = listen(listenSocket, SOMAXCONN);
     if (iResult == SOCKET_ERROR)
@@ -88,33 +102,74 @@ int main()
     }
 
     printf("Server socket is set to listening mode. Waiting for new connection requests.\n");
+    fd_set readfds;
+    timeval timeVal;
+    timeVal.tv_sec = 1;
+    timeVal.tv_usec = 0;
 
     while (true)
     {
-        // Struct for information about connected client
-        sockaddr_in clientAddr;
+        FD_ZERO(&readfds);
 
-        int clientAddrSize = sizeof(struct sockaddr_in);
+        if (count_clients != MAX_CLIENTS) {
+            FD_SET(listenSocket, &readfds);
+        }
 
-        // Prihvat veze sa 1. klijentom 
-        acceptedSocket = accept(listenSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
+        for (int i = 0;i < MAX_CLIENTS;i++) {
+            FD_SET(clientSockets[i], &readfds);
+        }
 
-        // Check if accepted socket is valid 
-        if (acceptedSocket == INVALID_SOCKET)
+        int sResult = select(0, &readfds, NULL, NULL, &timeVal);
+
+        if (sResult == SOCKET_ERROR)
         {
-            printf("accept failed with error: %d\n", WSAGetLastError());
+            printf("Select failed with error: %d\n", WSAGetLastError());
             closesocket(listenSocket);
             WSACleanup();
             return 1;
         }
+        else if (sResult == 0) // timeout expired
+        {
+            if (_kbhit()) //check if some key is pressed
+            {
+                getch();
+                printf("Primena racunarskih mreza u infrstrukturnim sistemima 2019/2020\n");
+            }
+            continue;
+        }
+        else if (FD_ISSET(listenSocket, &readfds))
+        {
+            sockaddr_in clientAddr;
+            int clientAddrSize = sizeof(struct sockaddr_in);
 
-        printf("\nNew client request accepted. Client address: %s : %d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+            clientSockets[count_clients] = accept(listenSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
 
-        //korak 2.a postavljanje uticnica namenjenih klijentima u neblokirajuci rezim
-        unsigned long mode = 1; //non-blocking mode
-        iResult = ioctlsocket(acceptedSocket, FIONBIO, &mode);
-        if (iResult != NO_ERROR)
-            printf("ioctlsocket failed with error: %ld\n", iResult);
+            if (clientSockets[count_clients] == INVALID_SOCKET)
+            {
+                if (WSAGetLastError() == WSAECONNRESET)
+                {
+                    printf("accept failed, because timeout for client request has expired.\n");
+                }
+                else
+                {
+                    printf("accept failed with error: %d\n", WSAGetLastError());
+                }
+            }
+            else
+            {
+                if (ioctlsocket(clientSockets[count_clients], FIONBIO, &mode) != 0)
+                {
+                    printf("ioctlsocket failed with error.");
+                    continue;
+                }
+                count_clients++;
+                printf("New client request accepted (%d). Client address: %s : %d\n", count_clients, inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+
+            }
+        }
+        else {
+
+        }
 
 
     };
@@ -122,7 +177,6 @@ int main()
 
     //Close listen and accepted sockets
     closesocket(listenSocket);
-    closesocket(acceptedSocket);
 
     // Deinitialize WSA library
     WSACleanup();
