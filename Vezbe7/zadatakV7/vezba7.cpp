@@ -60,7 +60,39 @@ void print_interface(pcap_if_t *dev)
 
 	// TODO 1: ispisati sve logičke adrese, subnet masku i broadcast adrese povezane sa mrežnim adapterom
 
+	if (dev->flags == PCAP_IF_LOOPBACK) {
+		printf("\tLoopback:\tyes\n");
+	}
+	else {
+		printf("\tLoopback:\tno\n");
+	}
 
+	pcap_addr *addresses = dev->addresses;
+	pcap_addr* address;
+
+	for (address = addresses;address;address = address->next) {
+		printf("\n\tADDRESS\n");
+
+		if (address->addr->sa_family == AF_INET) {
+			printf("\t# Address Type:\t\tIPv4\n");
+
+			if (address->addr) {
+				printf("\t# Address:\t\t%s\n",convert_sockaddr_to_string(address->addr));
+			}
+
+			if (address->netmask) {
+				printf("\t# Subnet mask:\t\t%s\n", convert_sockaddr_to_string(address->netmask));
+			}
+			if (address->broadaddr) {
+				printf("\t# Broadcast Address:\t%s\n", convert_sockaddr_to_string(address->broadaddr));
+			}
+
+
+		}
+		else if (address->addr->sa_family == AF_INET6) {
+			printf("\t# Address Type:\tIPv6\n");
+		}
+	}
 }
 
 // TODO 2: prevedi strukturu sackaddr u string kako bi se mogla ispisati
