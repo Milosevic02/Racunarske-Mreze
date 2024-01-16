@@ -17,7 +17,7 @@ void packet_handler(unsigned char* fd, const struct pcap_pkthdr*
 	packet_header, const unsigned char* packet_data);
 pcap_dumper_t* file_dumper;
 int arp_counter = 0;
-char key[] = "LEMON";
+char key[] = "PIQSR"; //LEMON pomeren za 4 mesta = PIQSR
 char* encrypt_data(char* message, char* key);
 
 
