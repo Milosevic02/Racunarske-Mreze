@@ -17,7 +17,7 @@ void packet_handler(unsigned char* fd, const struct pcap_pkthdr*
 	packet_header, const unsigned char* packet_data);
 pcap_dumper_t* file_dumper;
 int arp_counter = 0;
-char key[] = "LEMON";
+char key[] = "PIQSR"; //LEMON pomeren za 4 mesta = PIQSR
 char* encrypt_data(char* message, char* key);
 
 
@@ -101,9 +101,7 @@ void packet_handler(unsigned char* fd, const struct pcap_pkthdr*
 		ip_header* ih = (ip_header*)(packet_data + sizeof(ethernet_header));
 		memcpy(kopija + sizeof(ethernet_header), ih, ih->header_length * 4);
 
-		printf("Src: %d.%d.%d.%d\nDst: %d.%d.%d.%d\n",
-			ih->src_addr[0], ih->src_addr[1], ih->src_addr[2], ih->src_addr[3],
-			ih->dst_addr[0], ih->dst_addr[1], ih->dst_addr[2], ih->dst_addr[3]);
+		printf("%u", ih->ttl); // Ako ne valja ispis promeniti %u
 
 		if (ih->next_protocol == 0x6) {
 			tcp_header* th = (tcp_header*)((unsigned char*)ih + ih->header_length*4);
